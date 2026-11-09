@@ -304,7 +304,8 @@ const GAMES=[
  {id:"hundo",name:"Hundo",src:"",cat:"Web",url:"https://mayhex.gg/hundo/"},
  {id:"noillirk",name:"Noillirk",src:"",cat:"Web",url:"https://playdaily.org/noillirk"},
  {id:"sizeitup",name:"Size It Up",src:"",cat:"Web",url:"https://magnitudle.com/size-it-up"},
- {id:"krillion",name:"Krillion",src:"",cat:"Web",url:"https://krillion.io/"}
+ {id:"krillion",name:"Krillion",src:"",cat:"Web",url:"https://krillion.io/"},
+ {id:"hoopgrids",name:"HoopGrids",src:"NBA",cat:"Sports",url:"https://hoopgrids.com/"}
 ];
 const CATS=[...new Set(GAMES.map(g=>g.cat))];
 
@@ -366,6 +367,10 @@ const PARSERS={
  sizeitup:t=>{if(!/Size\s*It\s*Up|magnitudle/i.test(t))return null;
    const m=t.match(/(\d{1,3})\s*(?:\/\s*500|pts?\b|points)/i)||t.match(/Size\s*It\s*Up[^\n]*\n\s*(\d{1,3})\s*(?:\n|$)/i)||t.match(/Size\s*It\s*Up[^\n\d]*?#?\d*[^\n\d]*?\b(\d{2,3})\b(?![\/:%])/i);
    if(!m)return {score:null,rank:null};const v=+m[1];if(v>500)return {score:null,rank:null};return {score:`${v} pts`,rank:-v}},
+ hoopgrids:t=>{if(!/Hoop\s*Grids?|hoopgrids\.com/i.test(t))return null;
+   const m=t.match(/\b([0-9])\s*\/\s*9\b/)||t.match(/([0-9])\s*(?:of\s*9|correct)/i);
+   if(!m)return {score:null,rank:null};const n=+m[1];const r=t.match(/Rarity:?\s*([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
+   return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}},
  krillion:t=>{if(!/Krillion/i.test(t))return null;
    const m=t.match(/Krillion\s*#?\d+[^\n]*\n\s*([\d,]+)\s*(?:\n|$)/i);
    if(m){const v=+m[1].replace(/,/g,"");return {score:`${v.toLocaleString()} pts`,rank:-v}}
@@ -402,6 +407,7 @@ const SCORING={
  hundo:{col:"Points",rule:"Most points wins (100 is a perfect hand)."},
  noillirk:{col:"Points",rule:"Most points wins. Answers that match the crowd climb higher."},
  sizeitup:{col:"Points",rule:"Most points wins (500 max). Closer size estimates score higher."},
+ hoopgrids:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
  krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."}
 };
 /* Keep just the emoji grid lines from a share, never links or words */
@@ -456,6 +462,9 @@ const ART={
  sizeitup:()=>V(130,80,`<line x1="0" y1="72" x2="130" y2="72" class="s"/><rect x="14" y="50" width="16" height="22" class="k"/><text x="22" y="44" class="t" style="font-size:7px">REF</text>
    <rect x="52" y="18" width="46" height="54" class="h" style="stroke:var(--ink);stroke-width:1.6"/><rect x="52" y="18" width="46" height="54" class="s" style="stroke-dasharray:3 3" transform="translate(-8 -8) scale(1.15)" transform-origin="75 72"/>
    <path d="M104 14 l12 -8 M116 6 h-7 M116 6 v7" class="s"/><text x="118" y="44" class="t" style="font-size:8px">?</text>`),
+ hoopgrids:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,[0,2,4,7].includes(y*3+x)?"h":(y*3+x)===5?"k":"o");
+   const ball=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="7" class="o"/><path d="M${cx-7} ${cy}h14M${cx} ${cy-7}v14M${cx-5} ${cy-5}q4 5 0 10M${cx+5} ${cy-5}q-4 5 0 10" class="s" style="stroke-width:1"/>`;
+   [35,55,75].forEach(c=>{o+=ball(c,12)+ball(12,c)});return V(92,92,o)},
  krillion:()=>V(130,90,`<path d="M0 12 q12 -8 24 0 t24 0 t24 0 t24 0 t24 0 t10 0" class="s"/>`+[30,48,66,84].map((y,i)=>`<line x1="2" y1="${y}" x2="10" y2="${y}" class="s"/><text x="14" y="${y}" class="t" style="font-size:7px;text-anchor:start">${(i+1)*200}m</text>`).join("")+`<path d="M62 62 q16 -13 34 -2 q-9 11 -34 2z" class="h" style="stroke:var(--ink);stroke-width:1.6"/><path d="M62 62 l-11 -7 l2 7 l-2 7z" class="k"/><circle cx="90" cy="59" r="2" class="k"/><path d="M93 56 q11 -11 20 -9 M93 58 q13 -5 20 0" class="s"/><circle cx="78" cy="40" r="2.5" class="s"/><circle cx="84" cy="30" r="1.8" class="s"/>`),
  poeltl:()=>V(80,80,`<circle cx="40" cy="40" r="32" class="h" style="stroke:var(--ink);stroke-width:1.6"/><line x1="8" y1="40" x2="72" y2="40" class="s"/><line x1="40" y1="8" x2="40" y2="72" class="s"/><path d="M17 17 q14 23 0 46" class="s"/><path d="M63 17 q-14 23 0 46" class="s"/><text x="40" y="40" class="t" style="font-size:18px;font-family:var(--serif)">?</text>`)
 };
@@ -471,7 +480,7 @@ const loginFor = u => `${u.toLowerCase()}@${LOGIN_DOMAIN}`;
 
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const SECTION_NAMES = { NYT: "The Times Puzzles", Web: "Around the Web" };
+const SECTION_NAMES = { NYT: "The Times Puzzles", Web: "Around the Web", Sports: "Sports" };
 const ORD = n => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/, USER_RE = /^[A-Za-z0-9_.]{2,16}$/;
 

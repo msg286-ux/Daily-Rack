@@ -8,7 +8,7 @@ const loginFor = u => `${u.toLowerCase()}@${LOGIN_DOMAIN}`;
 
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const SECTION_NAMES = { NYT: "The Times Puzzles", Web: "Around the Web" };
+const SECTION_NAMES = { NYT: "The Times Puzzles", Web: "Around the Web", Sports: "Sports" };
 const ORD = n => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/, USER_RE = /^[A-Za-z0-9_.]{2,16}$/;
 
