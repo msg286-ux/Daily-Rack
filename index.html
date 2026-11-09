@@ -303,6 +303,7 @@ const GAMES=[
  {id:"span",name:"Span",src:"",cat:"Web",url:"https://mayhex.gg/span/"},
  {id:"hundo",name:"Hundo",src:"",cat:"Web",url:"https://mayhex.gg/hundo/"},
  {id:"noillirk",name:"Noillirk",src:"",cat:"Web",url:"https://playdaily.org/noillirk"},
+ {id:"sizeitup",name:"Size It Up",src:"",cat:"Web",url:"https://magnitudle.com/size-it-up"},
  {id:"krillion",name:"Krillion",src:"",cat:"Web",url:"https://krillion.io/"}
 ];
 const CATS=[...new Set(GAMES.map(g=>g.cat))];
@@ -362,6 +363,9 @@ const PARSERS={
    const metres=km?parseFloat(km[1].replace(/,/g,""))*1000:me?+me[1].replace(/,/g,""):null;
    if(metres!=null){const v=Math.round(metres/20);return {score:`${v.toLocaleString()} pts`,rank:-v}}
    return {score:null,rank:null}},
+ sizeitup:t=>{if(!/Size\s*It\s*Up|magnitudle/i.test(t))return null;
+   const m=t.match(/(\d{1,3})\s*(?:\/\s*500|pts?\b|points)/i)||t.match(/Size\s*It\s*Up[^\n]*\n\s*(\d{1,3})\s*(?:\n|$)/i)||t.match(/Size\s*It\s*Up[^\n\d]*?#?\d*[^\n\d]*?\b(\d{2,3})\b(?![\/:%])/i);
+   if(!m)return {score:null,rank:null};const v=+m[1];if(v>500)return {score:null,rank:null};return {score:`${v} pts`,rank:-v}},
  krillion:t=>{if(!/Krillion/i.test(t))return null;
    const m=t.match(/Krillion\s*#?\d+[^\n]*\n\s*([\d,]+)\s*(?:\n|$)/i);
    if(m){const v=+m[1].replace(/,/g,"");return {score:`${v.toLocaleString()} pts`,rank:-v}}
@@ -397,6 +401,7 @@ const SCORING={
  span:{col:"Time",rule:"Fastest time across the board wins."},
  hundo:{col:"Points",rule:"Most points wins (100 is a perfect hand)."},
  noillirk:{col:"Points",rule:"Most points wins. Answers that match the crowd climb higher."},
+ sizeitup:{col:"Points",rule:"Most points wins (500 max). Closer size estimates score higher."},
  krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."}
 };
 /* Keep just the emoji grid lines from a share, never links or words */
@@ -448,6 +453,9 @@ const ART={
  noillirk:()=>V(130,90,[12,30,48,66].map((y,i)=>`<line x1="120" y1="${y}" x2="128" y2="${y}" class="s"/><text x="116" y="${y}" class="t" style="font-size:7px;text-anchor:end">${(4-i)*3}km</text>`).join("")+
    [[44,18,"h"],[58,12,"o"],[70,20,"h"]].map(([x,y,cl])=>`<ellipse cx="${x}" cy="${y}" rx="8" ry="10" class="${cl}" style="stroke:var(--ink);stroke-width:1.6"/><line x1="${x}" y1="${y+10}" x2="58" y2="52" class="s" style="stroke-width:1"/>`).join("")+
    `<path d="M44 58 q14 -10 28 0 q-8 9 -28 0z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><circle cx="66" cy="57" r="1.8" class="k"/><path d="M0 84 q20 -8 40 0 t40 0 t30 0" class="s"/>`),
+ sizeitup:()=>V(130,80,`<line x1="0" y1="72" x2="130" y2="72" class="s"/><rect x="14" y="50" width="16" height="22" class="k"/><text x="22" y="44" class="t" style="font-size:7px">REF</text>
+   <rect x="52" y="18" width="46" height="54" class="h" style="stroke:var(--ink);stroke-width:1.6"/><rect x="52" y="18" width="46" height="54" class="s" style="stroke-dasharray:3 3" transform="translate(-8 -8) scale(1.15)" transform-origin="75 72"/>
+   <path d="M104 14 l12 -8 M116 6 h-7 M116 6 v7" class="s"/><text x="118" y="44" class="t" style="font-size:8px">?</text>`),
  krillion:()=>V(130,90,`<path d="M0 12 q12 -8 24 0 t24 0 t24 0 t24 0 t24 0 t10 0" class="s"/>`+[30,48,66,84].map((y,i)=>`<line x1="2" y1="${y}" x2="10" y2="${y}" class="s"/><text x="14" y="${y}" class="t" style="font-size:7px;text-anchor:start">${(i+1)*200}m</text>`).join("")+`<path d="M62 62 q16 -13 34 -2 q-9 11 -34 2z" class="h" style="stroke:var(--ink);stroke-width:1.6"/><path d="M62 62 l-11 -7 l2 7 l-2 7z" class="k"/><circle cx="90" cy="59" r="2" class="k"/><path d="M93 56 q11 -11 20 -9 M93 58 q13 -5 20 0" class="s"/><circle cx="78" cy="40" r="2.5" class="s"/><circle cx="84" cy="30" r="1.8" class="s"/>`),
  poeltl:()=>V(80,80,`<circle cx="40" cy="40" r="32" class="h" style="stroke:var(--ink);stroke-width:1.6"/><line x1="8" y1="40" x2="72" y2="40" class="s"/><line x1="40" y1="8" x2="40" y2="72" class="s"/><path d="M17 17 q14 23 0 46" class="s"/><path d="M63 17 q-14 23 0 46" class="s"/><text x="40" y="40" class="t" style="font-size:18px;font-family:var(--serif)">?</text>`)
 };
