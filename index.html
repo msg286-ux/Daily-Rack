@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The Daily Rack</title>
+<title>Daily Rack</title>
 <meta name="description" content="Every daily puzzle in one place. Play, log your result, and see how you rank against your friends.">
 <meta name="theme-color" content="#ebe9e1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23191917'/%3E%3Ctext x='16' y='23' font-family='Georgia' font-size='20' fill='%23ebe9e1' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@500;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:wght@900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@500;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: a front page. Masthead with ears and edition band, a "report your result" box, then categories as newspaper sections flowing in columns. */
 :root{
@@ -32,7 +32,7 @@ body{background:var(--paper);color:var(--ink);font:400 16px/1.45 var(--serif)}
 /* Masthead */
 .ears{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:700 11px/1 var(--sans);
   letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--rule);padding-bottom:8px}
-.mast{font:400 clamp(46px,10vw,104px)/1 var(--mast);text-align:center;margin:14px 0 10px;letter-spacing:.01em}
+.mast{font:900 clamp(52px,11vw,112px)/.95 "Playfair Display", Georgia, "Times New Roman", serif;text-align:center;margin:14px 0 18px;letter-spacing:-.01em}
 .motto{text-align:center;font:italic 400 15px/1.2 var(--serif);color:var(--soft);margin:-2px 0 12px}
 .band{border-top:3px double var(--rule);border-bottom:1px solid var(--rule);padding:8px 0;display:flex;
   justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font:700 12px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}
@@ -172,7 +172,7 @@ body.locked{overflow:hidden}
   font:800 13px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase}
 .pc-body{padding:18px 20px 20px;display:grid;gap:10px;
   background:radial-gradient(var(--faint) 1px,transparent 1.4px) 0 0/8px 8px}
-.pc-mast{font:400 30px/1 var(--mast);text-align:center;border-bottom:3px double var(--rule);padding-bottom:10px}
+.pc-mast{font:900 30px/1 "Playfair Display", Georgia, serif;text-align:center;border-bottom:3px double var(--rule);padding-bottom:10px}
 .pass-card h2{font:700 26px/1.1 var(--serif);margin:4px 0 0}
 .pass-card p{margin:0;color:var(--soft);font-size:15px}
 #pass-form{display:grid;gap:10px;margin-top:4px}
@@ -278,7 +278,7 @@ body{margin:0}
 <body>
 <div class="page">
   <div class="ears"><span id="vol"></span><span id="date"></span><span id="pass"></span></div>
-  <h1 class="mast">The Daily Rack</h1>
+  <h1 class="mast">Daily Rack</h1>
   <p class="motto">All the puzzles fit to play</p>
   <div class="band"><span>Morning Edition</span><span id="reset-in"></span></div>
 
@@ -618,7 +618,7 @@ function renderAuth() {
   <div class="pass-card" role="dialog" aria-modal="true" aria-labelledby="pc-title">
     <div class="pc-top"><span>Press</span><span>Vol. I</span></div>
     <div class="pc-body">
-      <div class="pc-mast">The Daily Rack</div>
+      <div class="pc-mast">Daily Rack</div>
       <h2 id="pc-title">${join ? "Welcome, reader." : "Welcome back."}</h2>
       <p>${join ? "Make your press pass to log scores and see how you rank against your friends." : "Sign in with your username and password."}</p>
       <form id="auth-form" novalidate>
