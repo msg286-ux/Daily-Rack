@@ -9,7 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23191917'/%3E%3Ctext x='16' y='23' font-family='Georgia' font-size='20' fill='%23ebe9e1' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:wght@900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@500;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Grenze+Gotisch:wght@800&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@500;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: a front page. Masthead with ears and edition band, a "report your result" box, then categories as newspaper sections flowing in columns. */
 :root{
@@ -32,7 +32,7 @@ body{background:var(--paper);color:var(--ink);font:400 16px/1.45 var(--serif)}
 /* Masthead */
 .ears{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:700 11px/1 var(--sans);
   letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--rule);padding-bottom:8px}
-.mast{font:900 clamp(52px,11vw,112px)/.95 "Playfair Display", Georgia, "Times New Roman", serif;text-align:center;margin:14px 0 18px;letter-spacing:-.01em}
+.mast{font:800 clamp(56px,12vw,120px)/.95 "Grenze Gotisch", "UnifrakturMaguntia", Georgia, serif;text-align:center;margin:14px 0 18px;letter-spacing:-.01em}
 .motto{text-align:center;font:italic 400 15px/1.2 var(--serif);color:var(--soft);margin:-2px 0 12px}
 .band{border-top:3px double var(--rule);border-bottom:1px solid var(--rule);padding:8px 0;display:flex;
   justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font:700 12px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}
@@ -76,7 +76,7 @@ textarea{width:100%;min-height:64px;resize:vertical;font:500 13px/1.4 var(--mono
 /* Puzzle page: section flags, then an even grid of clipping panels (a compact list on phones) */
 .sections{display:grid;gap:32px;padding-top:28px}
 .flag{display:flex;align-items:baseline;gap:12px;border-top:3px solid var(--rule);border-bottom:1px solid var(--rule);padding:7px 0;margin-bottom:16px}
-.flag .letter{font:400 30px/1 var(--mast)}
+.flag .letter{font:800 30px/1 "Grenze Gotisch", var(--mast)}
 .flag h2{font:800 13px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;margin:0;flex:1}
 .flag .ct{font:600 12px/1 var(--mono)}
 .panels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
@@ -172,7 +172,7 @@ body.locked{overflow:hidden}
   font:800 13px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase}
 .pc-body{padding:18px 20px 20px;display:grid;gap:10px;
   background:radial-gradient(var(--faint) 1px,transparent 1.4px) 0 0/8px 8px}
-.pc-mast{font:900 30px/1 "Playfair Display", Georgia, serif;text-align:center;border-bottom:3px double var(--rule);padding-bottom:10px}
+.pc-mast{font:800 34px/1 "Grenze Gotisch", Georgia, serif;text-align:center;border-bottom:3px double var(--rule);padding-bottom:10px}
 .pass-card h2{font:700 26px/1.1 var(--serif);margin:4px 0 0}
 .pass-card p{margin:0;color:var(--soft);font-size:15px}
 #pass-form{display:grid;gap:10px;margin-top:4px}
@@ -251,6 +251,29 @@ a.pass{text-decoration:none;border-bottom:1.5px solid currentColor}
 
 body{margin:0}
 [hidden]{display:none!important}
+/* Each game card wears its signature colors: a tint behind the drawing, a color band, and its own highlight */
+.panel{--sig:var(--rule)}
+.panel .art{background-color:color-mix(in srgb,var(--sig) 20%,var(--paper))}
+.panel .cap{border-top:5px solid var(--sig);margin-top:-1.5px}
+.art .cy{fill:#f9df6d}.art .cg{fill:#a0c35a}.art .cb{fill:#b0c4ef}.art .cp{fill:#ba81c5}
+.panel[data-g="wordle"]{--sig:#6aaa64}.panel[data-g="wordle"] .art .h{fill:#c9b458}.panel[data-g="wordle"] .art .k{fill:#6aaa64}
+.panel[data-g="connections"]{--sig:#ba81c5}
+.panel[data-g="strands"]{--sig:#aedfee}.panel[data-g="strands"] .art .h{fill:#f8cd05}
+.panel[data-g="mini"]{--sig:#6493e6}.panel[data-g="mini"] .art .h{fill:#ffda00}
+.panel[data-g="spellingbee"]{--sig:#f7da21}.panel[data-g="spellingbee"] .art .h{fill:#f7da21}
+.panel[data-g="letterboxed"]{--sig:#fc716b}.panel[data-g="letterboxed"] .art .h{fill:#fc716b}
+.panel[data-g="pips"]{--sig:#c06bd6}.panel[data-g="pips"] .art .h{fill:#c06bd6}
+.panel[data-g="chainle"]{--sig:#f08a24}.panel[data-g="chainle"] .art .h{fill:#f08a24}
+.panel[data-g="span"]{--sig:#2bb3a3}.panel[data-g="span"] .art .h{fill:#2bb3a3}
+.panel[data-g="hundo"]{--sig:#2e7d4f}.panel[data-g="hundo"] .art .h{fill:#e8b931}
+.panel[data-g="noillirk"]{--sig:#8ec9f0}.panel[data-g="noillirk"] .art .h{fill:#ff8fa3}
+.panel[data-g="sizeitup"]{--sig:#ffb02e}.panel[data-g="sizeitup"] .art .h{fill:#ffb02e}
+.panel[data-g="pour"]{--sig:#8b6cf0}.panel[data-g="pour"] .art .h{fill:#f5b83d}
+.panel[data-g="krillion"]{--sig:#1f5d8c}.panel[data-g="krillion"] .art .h{fill:#ff7f8e}
+.panel[data-g="ig_baseball"]{--sig:#1e3a6e}.panel[data-g="ig_baseball"] .art .h{fill:#e03a3e}
+.panel[data-g="ig_football"]{--sig:#2f6b3a}.panel[data-g="ig_football"] .art .h{fill:#b5793f}
+.panel[data-g="ig_basketball"]{--sig:#e87722}.panel[data-g="ig_basketball"] .art .h{fill:#e87722}
+.panel[data-g="ig_hockey"]{--sig:#7cc3e6}.panel[data-g="ig_hockey"] .art .h{fill:#1b3a5c}
 *,*::before,*::after{box-sizing:border-box}
 .paste-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .paste-big{font:800 15px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);border:0;
@@ -462,7 +485,7 @@ const ART={
  quordle:()=>{let o="";[[0,0],[62,0],[0,40],[62,40]].forEach(([X,Y],b)=>{for(let i=0;i<5;i++)o+=sq(X+i*11,Y,9,(i+b)%3===0?"k":"o");for(let i=0;i<5;i++)o+=sq(X+i*11,Y+12,9,b===1&&i<4?"k":i%2?"h":"o")});return V(116,62,o)},
  nerdle:()=>tiles([{w:"12+35=47",c:[..."ohoookoh"]},{w:"10+37=47",c:[..."kkkkkkkk"]}]),
  waffle:()=>{let o="";for(let y=0;y<5;y++)for(let x=0;x<5;x++)if(!(x%2&&y%2))o+=sq(x*17,y*17,15,(x+y)%3===0?"k":(x*y)%4===1?"h":"o");return V(83,83,o)},
- connections:()=>{let o="";for(let y=0;y<4;y++)for(let x=0;x<4;x++)o+=sq(x*30,y*20,27,y===0?"k":y===1?"h":"o");return V(117,77,o)},
+ connections:()=>{let o="";for(let y=0;y<4;y++)for(let x=0;x<4;x++)o+=sq(x*30,y*20,27,["cy","cg","cb","cp"][y]);return V(117,77,o)},
  immaculate:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(20+x*22,20+y*22,20,(x+y)%2===0?"k":"o");
    ["◆","●","▲"].forEach((s,i)=>{o+=`<text x="${30+i*22}" y="9" class="t">${s}</text><text x="9" y="${31+i*22}" class="t">${s}</text>`});return V(86,86,o)},
  mini:()=>{const b=new Set([0,4,20,24]);let o="";for(let i=0;i<25;i++){const x=i%5,y=Math.floor(i/5);o+=sq(x*16,y*16,16,b.has(i)?"k":"o");
@@ -592,7 +615,7 @@ function render() {
     const gs = GAMES.filter(g => g.cat === c); const n = gs.filter(g => mine(g.id)).length;
     return `<section><div class="flag"><span class="letter">${"ABCDEFGH"[ci]}</span><h2>${SECTION_NAMES[c] || c}</h2>${me ? `<span class="ct">${n}/${gs.length} solved</span>` : ""}</div>
       <div class="panels">${gs.map(g => { const e = mine(g.id); const L = leaderOf(g.id); return `
-      <article class="panel${e ? " done" : ""}">
+      <article class="panel${e ? " done" : ""}" data-g="${g.id}">
         <div class="art" aria-hidden="true">${art(g.id)}</div>
         <div class="cap"><div class="cap-txt">${g.src ? `<span class="src">${g.src}</span>` : ""}<h3>${g.name}</h3>
           ${L ? `<div class="leader">Leader: ${esc(L.profiles?.username || "someone")} · ${esc(L.score || "")}</div>` : ""}
