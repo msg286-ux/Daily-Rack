@@ -308,7 +308,8 @@ const GAMES=[
  {id:"noillirk",name:"Noillirk",src:"",cat:"Web",url:"https://playdaily.org/noillirk"},
  {id:"sizeitup",name:"Size It Up",src:"",cat:"Web",url:"https://magnitudle.com/size-it-up"},
  {id:"krillion",name:"Krillion",src:"",cat:"Web",url:"https://krillion.io/"},
- {id:"hoopgrids",name:"HoopGrids",src:"NBA",cat:"Sports",url:"https://hoopgrids.com/"}
+ {id:"hoopgrids",name:"HoopGrids",src:"NBA",cat:"Sports",url:"https://hoopgrids.com/"},
+ {id:"puckdoku",name:"Puckdoku",src:"NHL",cat:"Sports",url:"https://www.puckdoku.com/"}
 ];
 const CATS=[...new Set(GAMES.map(g=>g.cat))];
 
@@ -374,6 +375,12 @@ const PARSERS={
    const m=t.match(/\b([0-9])\s*\/\s*9\b/)||t.match(/([0-9])\s*(?:of\s*9|correct)/i);
    if(!m)return {score:null,rank:null};const n=+m[1];const r=t.match(/Rarity:?\s*([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
    return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}},
+ puckdoku:t=>{if(!/Puck\s*doku|puckdoku\.com/i.test(t))return null;
+   let n=null;const m=t.match(/\b([0-9])\s*\/\s*9\b/)||t.match(/([0-9])\s*(?:of\s*9|correct)/i);
+   if(m)n=+m[1];else{const g=(t.match(/[🟩✅]/gu)||[]).length;if(g)n=Math.min(9,g)}
+   if(n==null)return {score:null,rank:null};
+   const r=t.match(/(?:Rarity|Uniqueness)[^\d]{0,4}([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
+   return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}},
  krillion:t=>{if(!/Krillion/i.test(t))return null;
    const m=t.match(/Krillion\s*#?\d+[^\n]*\n\s*([\d,]+)\s*(?:\n|$)/i);
    if(m){const v=+m[1].replace(/,/g,"");return {score:`${v.toLocaleString()} pts`,rank:-v}}
@@ -411,6 +418,7 @@ const SCORING={
  noillirk:{col:"Points",rule:"Most points wins. Answers that match the crowd climb higher."},
  sizeitup:{col:"Points",rule:"Most points wins (500 max). Closer size estimates score higher."},
  hoopgrids:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
+ puckdoku:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower (rarer) rarity score wins."},
  krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."}
 };
 /* Keep just the emoji grid lines from a share, never links or words */
@@ -468,6 +476,9 @@ const ART={
  hoopgrids:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,[0,2,4,7].includes(y*3+x)?"h":(y*3+x)===5?"k":"o");
    const ball=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="7" class="o"/><path d="M${cx-7} ${cy}h14M${cx} ${cy-7}v14M${cx-5} ${cy-5}q4 5 0 10M${cx+5} ${cy-5}q-4 5 0 10" class="s" style="stroke-width:1"/>`;
    [35,55,75].forEach(c=>{o+=ball(c,12)+ball(12,c)});return V(92,92,o)},
+ puckdoku:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,[1,3,4,8].includes(y*3+x)?"h":(y*3+x)===6?"k":"o");
+   const puck=(cx,cy)=>`<ellipse cx="${cx}" cy="${cy+2}" rx="7" ry="3" class="k"/><rect x="${cx-7}" y="${cy-2}" width="14" height="4" class="k"/><ellipse cx="${cx}" cy="${cy-2}" rx="7" ry="3" class="o"/>`;
+   [35,55,75].forEach(c=>{o+=puck(c,12)+puck(12,c)});return V(92,92,o)},
  krillion:()=>V(130,90,`<path d="M0 12 q12 -8 24 0 t24 0 t24 0 t24 0 t24 0 t10 0" class="s"/>`+[30,48,66,84].map((y,i)=>`<line x1="2" y1="${y}" x2="10" y2="${y}" class="s"/><text x="14" y="${y}" class="t" style="font-size:7px;text-anchor:start">${(i+1)*200}m</text>`).join("")+`<path d="M62 62 q16 -13 34 -2 q-9 11 -34 2z" class="h" style="stroke:var(--ink);stroke-width:1.6"/><path d="M62 62 l-11 -7 l2 7 l-2 7z" class="k"/><circle cx="90" cy="59" r="2" class="k"/><path d="M93 56 q11 -11 20 -9 M93 58 q13 -5 20 0" class="s"/><circle cx="78" cy="40" r="2.5" class="s"/><circle cx="84" cy="30" r="1.8" class="s"/>`),
  poeltl:()=>V(80,80,`<circle cx="40" cy="40" r="32" class="h" style="stroke:var(--ink);stroke-width:1.6"/><line x1="8" y1="40" x2="72" y2="40" class="s"/><line x1="40" y1="8" x2="40" y2="72" class="s"/><path d="M17 17 q14 23 0 46" class="s"/><path d="M63 17 q-14 23 0 46" class="s"/><text x="40" y="40" class="t" style="font-size:18px;font-family:var(--serif)">?</text>`)
 };
