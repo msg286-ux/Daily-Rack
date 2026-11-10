@@ -309,14 +309,24 @@ const GAMES=[
  {id:"sizeitup",name:"Size It Up",src:"",cat:"Web",url:"https://magnitudle.com/size-it-up"},
  {id:"pour",name:"Pour",src:"",cat:"Web",url:"https://mayhex.gg/pour/"},
  {id:"krillion",name:"Krillion",src:"",cat:"Web",url:"https://krillion.io/"},
- {id:"hoopgrids",name:"HoopGrids",src:"NBA",cat:"Sports",url:"https://hoopgrids.com/"},
- {id:"puckdoku",name:"Puckdoku",src:"NHL",cat:"Sports",url:"https://www.puckdoku.com/"}
+ {id:"ig_baseball",name:"Immaculate Grid",src:"Baseball",cat:"Sports",url:"https://www.immaculategrid.com/"},
+ {id:"ig_football",name:"Immaculate Grid",src:"Football",cat:"Sports",url:"https://www.immaculategrid.com/football/"},
+ {id:"ig_basketball",name:"Immaculate Grid",src:"Basketball",cat:"Sports",url:"https://www.immaculategrid.com/basketball/men/"},
+ {id:"ig_hockey",name:"Immaculate Grid",src:"Hockey",cat:"Sports",url:"https://www.immaculategrid.com/hockey/"}
 ];
 const CATS=[...new Set(GAMES.map(g=>g.cat))];
 
 /* Share-text parsers: each returns {score, rank} or null. Lower rank is better (kept for the future leaderboard). */
 const outOf=(re,n)=>t=>{const m=t.match(re);if(!m)return null;const x=m[1].toUpperCase();
   return {score:x==="X"?`X/${n}`:`${x}/${n}`,rank:x==="X"?n+1:+x}};
+/* Immaculate Grid (Sports Reference): one parser per sport, told apart by the sport's name or emoji in the share */
+function igParse(sport,re){return t=>{if(!/Immaculate/i.test(t))return null;
+  const isB=/Basketball|🏀/i.test(t),isF=/Football|🏈/i.test(t),isH=/Hockey|🏒/i.test(t);
+  const which=isB?"basketball":isF?"football":isH?"hockey":"baseball";if(which!==sport)return null;
+  const m=t.match(/\b([0-9])\s*\/\s*9\b/);if(!m)return {score:null,rank:null};const n=+m[1];
+  const r=t.match(/Rarity:?\s*([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
+  return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}}}
+const IG_PARSERS={ig_baseball:igParse("baseball"),ig_football:igParse("football"),ig_basketball:igParse("basketball"),ig_hockey:igParse("hockey")};
 const PARSERS={
  wordle:outOf(/Wordle\s+[\d,]+\s+([1-6X])\/6/i,6),
  worldle:outOf(/#Worldle[^\n]*?\b([1-6X])\/6/i,6),
@@ -350,8 +360,6 @@ const PARSERS={
  globle:t=>{if(!/Globle/i.test(t))return null;const m=t.match(/=\s*(\d+)/);if(!m)return null;
    return {score:`${m[1]} guesses`,rank:+m[1]}},
  contexto:t=>{const m=t.match(/contexto[^\n]*?(\d+)\s+guess/i);if(!m)return null;return {score:`${m[1]} guesses`,rank:+m[1]}},
- immaculate:t=>{const m=t.match(/Immaculate Grid[^\n]*?(\d)\/9/i);if(!m)return null;
-   return {score:`${m[1]}/9`,rank:9-+m[1]}},
  chainle:t=>{if(!/Chainle/i.test(t))return null;
    const m=t.match(/Chainle\s*#?\d+\s*[·•|\-–—]?\s*([\d,]+)/i)||t.match(/([\d,]{1,5})\s*(?:\/\s*5,?000|pts?\b|points)/i);
    if(!m)return {score:null,rank:null};const v=+m[1].replace(/,/g,"");return {score:`${v.toLocaleString()} pts`,rank:-v}},
@@ -372,16 +380,7 @@ const PARSERS={
  sizeitup:t=>{if(!/Size\s*It\s*Up|magnitudle/i.test(t))return null;
    const m=t.match(/(\d{1,3})\s*(?:\/\s*500|pts?\b|points)/i)||t.match(/Size\s*It\s*Up[^\n]*\n\s*(\d{1,3})\s*(?:\n|$)/i)||t.match(/Size\s*It\s*Up[^\n\d]*?#?\d*[^\n\d]*?\b(\d{2,3})\b(?![\/:%])/i);
    if(!m)return {score:null,rank:null};const v=+m[1];if(v>500)return {score:null,rank:null};return {score:`${v} pts`,rank:-v}},
- hoopgrids:t=>{if(!/Hoop\s*Grids?|hoopgrids\.com/i.test(t))return null;
-   const m=t.match(/\b([0-9])\s*\/\s*9\b/)||t.match(/([0-9])\s*(?:of\s*9|correct)/i);
-   if(!m)return {score:null,rank:null};const n=+m[1];const r=t.match(/Rarity:?\s*([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
-   return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}},
- puckdoku:t=>{if(!/Puck\s*doku|puckdoku\.com/i.test(t))return null;
-   let n=null;const m=t.match(/\b([0-9])\s*\/\s*9\b/)||t.match(/([0-9])\s*(?:of\s*9|correct)/i);
-   if(m)n=+m[1];else{const g=(t.match(/[🟩✅]/gu)||[]).length;if(g)n=Math.min(9,g)}
-   if(n==null)return {score:null,rank:null};
-   const r=t.match(/(?:Rarity|Uniqueness)[^\d]{0,4}([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
-   return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}},
+ ...IG_PARSERS,
  pour:t=>{if(!/\bPOUR\b|mayhex\.gg\/pour/i.test(t))return null;
    const m=t.match(/(\d{1,3})\s*(?:\/\s*500|pts?\b|points)/i)||t.match(/\bPOUR\b[^\n]*\n\s*(\d{1,3})\s*(?:\n|$)/i)||t.match(/\bPOUR\b[^\n\d]*?#?\d*[^\n\d]*?\b(\d{2,3})\b(?![\/:%])/i);
    if(!m)return {score:null,rank:null};const v=+m[1];if(v>500)return {score:null,rank:null};return {score:`${v} pts`,rank:-v}},
@@ -421,8 +420,10 @@ const SCORING={
  hundo:{col:"Points",rule:"Most points wins (100 is a perfect hand)."},
  noillirk:{col:"Points",rule:"Most points wins. Answers that match the crowd climb higher."},
  sizeitup:{col:"Points",rule:"Most points wins (500 max). Closer size estimates score higher."},
- hoopgrids:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
- puckdoku:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower (rarer) rarity score wins."},
+ ig_baseball:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
+ ig_football:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
+ ig_basketball:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
+ ig_hockey:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
  pour:{col:"Points",rule:"Most points wins (500 max). The closer your line to where the liquid settles, the more you score."},
  krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."}
 };
@@ -478,12 +479,10 @@ const ART={
  sizeitup:()=>V(130,80,`<line x1="0" y1="72" x2="130" y2="72" class="s"/><rect x="14" y="50" width="16" height="22" class="k"/><text x="22" y="44" class="t" style="font-size:7px">REF</text>
    <rect x="52" y="18" width="46" height="54" class="h" style="stroke:var(--ink);stroke-width:1.6"/><rect x="52" y="18" width="46" height="54" class="s" style="stroke-dasharray:3 3" transform="translate(-8 -8) scale(1.15)" transform-origin="75 72"/>
    <path d="M104 14 l12 -8 M116 6 h-7 M116 6 v7" class="s"/><text x="118" y="44" class="t" style="font-size:8px">?</text>`),
- hoopgrids:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,[0,2,4,7].includes(y*3+x)?"h":(y*3+x)===5?"k":"o");
-   const ball=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="7" class="o"/><path d="M${cx-7} ${cy}h14M${cx} ${cy-7}v14M${cx-5} ${cy-5}q4 5 0 10M${cx+5} ${cy-5}q-4 5 0 10" class="s" style="stroke-width:1"/>`;
-   [35,55,75].forEach(c=>{o+=ball(c,12)+ball(12,c)});return V(92,92,o)},
- puckdoku:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,[1,3,4,8].includes(y*3+x)?"h":(y*3+x)===6?"k":"o");
-   const puck=(cx,cy)=>`<ellipse cx="${cx}" cy="${cy+2}" rx="7" ry="3" class="k"/><rect x="${cx-7}" y="${cy-2}" width="14" height="4" class="k"/><ellipse cx="${cx}" cy="${cy-2}" rx="7" ry="3" class="o"/>`;
-   [35,55,75].forEach(c=>{o+=puck(c,12)+puck(12,c)});return V(92,92,o)},
+ ig_baseball:()=>gridArt("baseball"),
+ ig_football:()=>gridArt("football"),
+ ig_basketball:()=>gridArt("basketball"),
+ ig_hockey:()=>gridArt("hockey"),
  pour:()=>V(130,84,`<path d="M18 30 l6 46 h22 l6 -46z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><path d="M20 46 l4 30 h22 l4 -30z" class="h"/>
    <g transform="rotate(-28 50 30)"><path d="M44 12 l5 38 h18 l5 -38z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><path d="M46 24 l3 26 h18 l3 -26z" class="h"/></g>
    <path d="M70 28 q6 10 10 26" class="s" style="stroke:var(--hl);stroke-width:3"/>
@@ -492,6 +491,15 @@ const ART={
  krillion:()=>V(130,90,`<path d="M0 12 q12 -8 24 0 t24 0 t24 0 t24 0 t24 0 t10 0" class="s"/>`+[30,48,66,84].map((y,i)=>`<line x1="2" y1="${y}" x2="10" y2="${y}" class="s"/><text x="14" y="${y}" class="t" style="font-size:7px;text-anchor:start">${(i+1)*200}m</text>`).join("")+`<path d="M62 62 q16 -13 34 -2 q-9 11 -34 2z" class="h" style="stroke:var(--ink);stroke-width:1.6"/><path d="M62 62 l-11 -7 l2 7 l-2 7z" class="k"/><circle cx="90" cy="59" r="2" class="k"/><path d="M93 56 q11 -11 20 -9 M93 58 q13 -5 20 0" class="s"/><circle cx="78" cy="40" r="2.5" class="s"/><circle cx="84" cy="30" r="1.8" class="s"/>`),
  poeltl:()=>V(80,80,`<circle cx="40" cy="40" r="32" class="h" style="stroke:var(--ink);stroke-width:1.6"/><line x1="8" y1="40" x2="72" y2="40" class="s"/><line x1="40" y1="8" x2="40" y2="72" class="s"/><path d="M17 17 q14 23 0 46" class="s"/><path d="M63 17 q-14 23 0 46" class="s"/><text x="40" y="40" class="t" style="font-size:18px;font-family:var(--serif)">?</text>`)
 };
+/* 3x3 grid with the sport's ball along the top and side */
+function gridArt(sport){const lit={baseball:[0,4,5,8],football:[1,2,4,6],basketball:[0,2,4,7],hockey:[1,3,4,8]}[sport],dark={baseball:2,football:8,basketball:5,hockey:6}[sport];
+  let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,lit.includes(y*3+x)?"h":(y*3+x)===dark?"k":"o");
+  const ico={
+    baseball:(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="7" class="o"/><path d="M${cx-4} ${cy-6}q3 6 0 12M${cx+4} ${cy-6}q-3 6 0 12" class="s" style="stroke-width:1;stroke:var(--stamp)"/>`,
+    football:(cx,cy)=>`<ellipse cx="${cx}" cy="${cy}" rx="8" ry="5" class="o" transform="rotate(-30 ${cx} ${cy})"/><path d="M${cx-3} ${cy+2}l6 -4M${cx-2} ${cy-1}l2 2M${cx} ${cy-2}l2 2" class="s" style="stroke-width:1"/>`,
+    basketball:(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="7" class="o"/><path d="M${cx-7} ${cy}h14M${cx} ${cy-7}v14M${cx-5} ${cy-5}q4 5 0 10M${cx+5} ${cy-5}q-4 5 0 10" class="s" style="stroke-width:1"/>`,
+    hockey:(cx,cy)=>`<ellipse cx="${cx}" cy="${cy+2}" rx="7" ry="3" class="k"/><rect x="${cx-7}" y="${cy-2}" width="14" height="4" class="k"/><ellipse cx="${cx}" cy="${cy-2}" rx="7" ry="3" class="o"/>`}[sport];
+  [35,55,75].forEach(c=>{o+=ico(c,12)+ico(12,c)});return V(92,92,o)}
 function art(id){return (ART[id]||(()=>tiles([{w:"PLAY",c:[..."okho"]}])))()}
 
 /* ---------- The Daily Rack: public site (Supabase-backed) ---------- */
@@ -525,6 +533,8 @@ async function loadProfile() {
   const { data } = await sb.from("profiles").select("username, first_name, last_name").eq("id", me.id).maybeSingle();
   profile = data || null;
 }
+const fullName = g => g.cat === "Sports" && g.src ? `${g.name} (${g.src})` : g.name;
+const gameById = id => { const g = GAMES.find(x => x.id === id); return g && { ...g, name: fullName(g) }; };
 const mine = gid => me && results.find(r => r.user_id === me.id && r.game === gid);
 function parseShare(t) { for (const [id, fn] of Object.entries(PARSERS)) { const r = fn(t); if (r) return { id, ...r }; } return null; }
 
@@ -535,7 +545,7 @@ async function logText(t) {
   const { error } = await sb.from("results").upsert(row, { onConflict: "user_id,day,game" });
   if (error) return { error: "save" };
   fresh = r.id; await loadToday();
-  return { name: GAMES.find(g => g.id === r.id).name, score: r.score };
+  return { name: gameById(r.id).name, score: r.score };
 }
 
 function ranking(gid) {
@@ -642,7 +652,7 @@ function closeSheet() { sheet = null; renderSheet(); }
 function renderSheet() {
   const el = $("#sheet");
   if (!sheet) { el.innerHTML = ""; el.hidden = true; lock(); return; }
-  const g = GAMES.find(x => x.id === sheet.gid);
+  const g = gameById(sheet.gid);
   if (sheet.kind === "log" && el.dataset.k === "log:" + g.id && !el.hidden) return;
   let body;
   if (sheet.kind === "log") {
@@ -702,12 +712,12 @@ document.addEventListener("submit", async e => {
     inp.value = ""; m.className = "toast ok"; m.textContent = "Sent. Thanks for the tip!"; return;
   }
   if (e.target.id === "sh-form") {
-    const g = GAMES.find(x => x.id === sheet.gid), t = $("#sh-text").value.trim(), m = $("#sh-msg");
+    const g = gameById(sheet.gid), t = $("#sh-text").value.trim(), m = $("#sh-msg");
     const bad = x => { m.className = "toast"; m.textContent = x; };
     if (!t) return bad(`Paste your ${g.name} share text first.`);
     const r = parseShare(t);
     if (!r) return bad(`That doesn't look like a ${g.name} result. Copy it from the game's Share button.`);
-    if (r.id !== g.id) return bad(`That's a ${GAMES.find(x => x.id === r.id)?.name || "different game"} result, not ${g.name}.`);
+    if (r.id !== g.id) return bad(`That's a ${gameById(r.id)?.name || "different game"} result, not ${g.name}.`);
     $("#sh-go").disabled = true;
     const out = await logText(t);
     if (out.error) { $("#sh-go").disabled = false; return bad("Couldn't save that. Check your connection and try again."); }
