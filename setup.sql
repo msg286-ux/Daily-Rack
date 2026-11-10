@@ -69,3 +69,16 @@ language sql security definer set search_path = public stable as $$
   select exists (select 1 from public.profiles where lower(username) = lower(name));
 $$;
 grant execute on function public.username_taken(text) to anon, authenticated;
+
+-- Letters to the editor: game ideas from players. Players can send them; nobody can read them through the site.
+-- Read them in Supabase → Table Editor → suggestions.
+create table if not exists public.suggestions (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  idea text not null check (char_length(idea) between 1 and 140),
+  created_at timestamptz not null default now()
+);
+alter table public.suggestions enable row level security;
+drop policy if exists "players send ideas" on public.suggestions;
+create policy "players send ideas" on public.suggestions for insert to authenticated with check (auth.uid() = user_id);
+grant insert on public.suggestions to authenticated;

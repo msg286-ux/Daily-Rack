@@ -190,11 +190,21 @@ document.addEventListener("click", e => {
   if (t.dataset.close === "auth") return closeAuth();
   if (id === "sh-x" || t.dataset.close === "sheet") return closeSheet();
   if (id === "sh-switch") { const gid = sheet.gid; closeSheet(); return openSheet("log", gid); }
-  const b = t.closest(".pbtn"); if (b) openSheet(b.dataset.act, b.dataset.id);
+  const b = t.closest(".pbtn[data-act]"); if (b) openSheet(b.dataset.act, b.dataset.id);
 });
 document.addEventListener("submit", async e => {
   e.preventDefault();
   if (e.target.id === "auth-form") return submitAuth();
+  if (e.target.id === "idea-form") {
+    const inp = $("#idea"), m = $("#idea-msg"), t = inp.value.trim(), btn = $("#idea-btn");
+    if (!t) { m.className = "toast"; m.textContent = "Type a game name or link first."; return; }
+    if (!me) return openAuth("join");
+    btn.disabled = true;
+    const { error } = await sb.from("suggestions").insert({ user_id: me.id, idea: t });
+    btn.disabled = false;
+    if (error) { m.className = "toast"; m.textContent = "Couldn't send that. Try again in a moment."; return; }
+    inp.value = ""; m.className = "toast ok"; m.textContent = "Sent. Thanks for the tip!"; return;
+  }
   if (e.target.id === "sh-form") {
     const g = GAMES.find(x => x.id === sheet.gid), t = $("#sh-text").value.trim(), m = $("#sh-msg");
     const bad = x => { m.className = "toast"; m.textContent = x; };
