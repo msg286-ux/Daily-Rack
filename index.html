@@ -307,6 +307,7 @@ const GAMES=[
  {id:"hundo",name:"Hundo",src:"",cat:"Web",url:"https://mayhex.gg/hundo/"},
  {id:"noillirk",name:"Noillirk",src:"",cat:"Web",url:"https://playdaily.org/noillirk"},
  {id:"sizeitup",name:"Size It Up",src:"",cat:"Web",url:"https://magnitudle.com/size-it-up"},
+ {id:"pour",name:"Pour",src:"",cat:"Web",url:"https://mayhex.gg/pour/"},
  {id:"krillion",name:"Krillion",src:"",cat:"Web",url:"https://krillion.io/"},
  {id:"hoopgrids",name:"HoopGrids",src:"NBA",cat:"Sports",url:"https://hoopgrids.com/"},
  {id:"puckdoku",name:"Puckdoku",src:"NHL",cat:"Sports",url:"https://www.puckdoku.com/"}
@@ -381,6 +382,9 @@ const PARSERS={
    if(n==null)return {score:null,rank:null};
    const r=t.match(/(?:Rarity|Uniqueness)[^\d]{0,4}([\d.,]+)/i);const rar=r?Math.min(999,parseFloat(r[1].replace(/,/g,""))):999;
    return {score:`${n}/9${r?` · rarity ${r[1]}`:""}`,rank:(9-n)*1000+rar}},
+ pour:t=>{if(!/\bPOUR\b|mayhex\.gg\/pour/i.test(t))return null;
+   const m=t.match(/(\d{1,3})\s*(?:\/\s*500|pts?\b|points)/i)||t.match(/\bPOUR\b[^\n]*\n\s*(\d{1,3})\s*(?:\n|$)/i)||t.match(/\bPOUR\b[^\n\d]*?#?\d*[^\n\d]*?\b(\d{2,3})\b(?![\/:%])/i);
+   if(!m)return {score:null,rank:null};const v=+m[1];if(v>500)return {score:null,rank:null};return {score:`${v} pts`,rank:-v}},
  krillion:t=>{if(!/Krillion/i.test(t))return null;
    const m=t.match(/Krillion\s*#?\d+[^\n]*\n\s*([\d,]+)\s*(?:\n|$)/i);
    if(m){const v=+m[1].replace(/,/g,"");return {score:`${v.toLocaleString()} pts`,rank:-v}}
@@ -419,6 +423,7 @@ const SCORING={
  sizeitup:{col:"Points",rule:"Most points wins (500 max). Closer size estimates score higher."},
  hoopgrids:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
  puckdoku:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower (rarer) rarity score wins."},
+ pour:{col:"Points",rule:"Most points wins (500 max). The closer your line to where the liquid settles, the more you score."},
  krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."}
 };
 /* Keep just the emoji grid lines from a share, never links or words */
@@ -479,6 +484,11 @@ const ART={
  puckdoku:()=>{let o="";for(let y=0;y<3;y++)for(let x=0;x<3;x++)o+=sq(26+x*20,26+y*20,18,[1,3,4,8].includes(y*3+x)?"h":(y*3+x)===6?"k":"o");
    const puck=(cx,cy)=>`<ellipse cx="${cx}" cy="${cy+2}" rx="7" ry="3" class="k"/><rect x="${cx-7}" y="${cy-2}" width="14" height="4" class="k"/><ellipse cx="${cx}" cy="${cy-2}" rx="7" ry="3" class="o"/>`;
    [35,55,75].forEach(c=>{o+=puck(c,12)+puck(12,c)});return V(92,92,o)},
+ pour:()=>V(130,84,`<path d="M18 30 l6 46 h22 l6 -46z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><path d="M20 46 l4 30 h22 l4 -30z" class="h"/>
+   <g transform="rotate(-28 50 30)"><path d="M44 12 l5 38 h18 l5 -38z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><path d="M46 24 l3 26 h18 l3 -26z" class="h"/></g>
+   <path d="M70 28 q6 10 10 26" class="s" style="stroke:var(--hl);stroke-width:3"/>
+   <path d="M78 34 l6 42 h26 l6 -42z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><path d="M80 60 l3 16 h26 l3 -16z" class="h"/>
+   <line x1="72" y1="52" x2="124" y2="52" class="s" style="stroke-dasharray:3 2"/><circle cx="124" cy="52" r="3" class="k"/>`),
  krillion:()=>V(130,90,`<path d="M0 12 q12 -8 24 0 t24 0 t24 0 t24 0 t24 0 t10 0" class="s"/>`+[30,48,66,84].map((y,i)=>`<line x1="2" y1="${y}" x2="10" y2="${y}" class="s"/><text x="14" y="${y}" class="t" style="font-size:7px;text-anchor:start">${(i+1)*200}m</text>`).join("")+`<path d="M62 62 q16 -13 34 -2 q-9 11 -34 2z" class="h" style="stroke:var(--ink);stroke-width:1.6"/><path d="M62 62 l-11 -7 l2 7 l-2 7z" class="k"/><circle cx="90" cy="59" r="2" class="k"/><path d="M93 56 q11 -11 20 -9 M93 58 q13 -5 20 0" class="s"/><circle cx="78" cy="40" r="2.5" class="s"/><circle cx="84" cy="30" r="1.8" class="s"/>`),
  poeltl:()=>V(80,80,`<circle cx="40" cy="40" r="32" class="h" style="stroke:var(--ink);stroke-width:1.6"/><line x1="8" y1="40" x2="72" y2="40" class="s"/><line x1="40" y1="8" x2="40" y2="72" class="s"/><path d="M17 17 q14 23 0 46" class="s"/><path d="M63 17 q-14 23 0 46" class="s"/><text x="40" y="40" class="t" style="font-size:18px;font-family:var(--serif)">?</text>`)
 };
