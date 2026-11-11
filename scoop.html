@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Scoop · Daily Rack</title>
+<meta name="description" content="The Daily Rack's own puzzle: seven rounds of over/under, rankings, closest guess and rare answers.">
+<meta name="theme-color" content="#ebe9e1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23191917'/%3E%3Ctext x='16' y='23' font-family='Georgia' font-size='20' fill='%23ebe9e1' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@500;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --paper:#ebe9e1; --ink:#191917; --soft:#55534d; --rule:#191917; --faint:#c9c6bb; --stamp:#c4122f; --hl:#f2d54b; --ok:#2e7d4f;
+  --serif:"Old Standard TT", Georgia, "Times New Roman", serif;
+  --sans:"Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1a1a18; --ink:#e7e3d8; --soft:#a29d90; --rule:#e7e3d8; --faint:#3a3934; --stamp:#ff5a6e; --hl:#6b5a12; --ok:#5fbf86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1a1a18; --ink:#e7e3d8; --soft:#a29d90; --rule:#e7e3d8; --faint:#3a3934; --stamp:#ff5a6e; --hl:#6b5a12; --ok:#5fbf86; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:400 17px/1.45 var(--serif)}
+.page{max-width:640px;margin:0 auto;padding-block:18px 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+a{color:inherit}
+.ears{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:700 11px/1 var(--sans);
+  letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--rule);padding-bottom:8px}
+.ears a{text-decoration:none}.ears a:hover{color:var(--stamp)}
+.mast{font:400 clamp(56px,16vw,96px)/1 "Pirata One", Georgia, serif;-webkit-text-stroke:.03em currentColor;text-align:center;margin:12px 0 4px}
+.motto{text-align:center;font:italic 400 15px/1.3 var(--serif);color:var(--soft);margin:0 0 12px}
+.band{border-top:3px double var(--rule);border-bottom:1px solid var(--rule);padding:8px 0;display:flex;
+  justify-content:space-between;align-items:center;gap:12px;font:700 12px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.band .tot{font:600 13px/1 var(--mono);letter-spacing:0}
+.band .tot b{background:var(--hl);padding:2px 5px}
+.dots{display:flex;gap:5px}
+.dots i{width:12px;height:12px;border:1.5px solid var(--ink);display:block}
+.dots i.now{background:var(--hl)} .dots i.g{background:var(--ok);border-color:var(--ok)} .dots i.y{background:var(--hl)}
+.dots i.o{background:#e0892b;border-color:#e0892b} .dots i.x{background:var(--ink)}
+
+#app{margin-top:22px}
+.kicker{font:800 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--stamp);margin:0 0 10px}
+h1.q{font:700 clamp(24px,6vw,32px)/1.15 var(--serif);margin:0 0 6px}
+.sub{color:var(--soft);font-style:italic;margin:0 0 18px}
+.timer{height:6px;border:1.5px solid var(--ink);margin:0 0 20px;position:relative;overflow:hidden}
+.timer span{position:absolute;inset:0 auto 0 0;background:var(--ink);transition:width .1s linear}
+.timer.low span{background:var(--stamp)}
+.kicker.k2{display:flex;justify-content:space-between;gap:10px}
+.secs{font:600 13px/1 var(--mono);color:var(--ink);letter-spacing:0}
+
+.btn{font:800 13px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);
+  border:0;padding:15px 22px;cursor:pointer;min-height:48px}
+.btn:hover{background:var(--stamp)} .btn:disabled{opacity:.4;cursor:default;background:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.ghost:hover{background:var(--hl)}
+.btn:focus-visible,.ou button:focus-visible,.ord button:focus-visible,input:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.ou{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ou button{font:800 18px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;padding:26px 10px;background:var(--paper);color:var(--ink);
+  border:2px solid var(--ink);cursor:pointer}
+.ou button:hover{background:var(--hl)}
+.ou button small{display:block;font:500 12px/1.2 var(--sans);letter-spacing:0;text-transform:none;margin-top:6px;color:var(--soft)}
+.line{font:700 clamp(30px,9vw,44px)/1 var(--mono);text-align:center;margin:4px 0 20px;padding:14px;border:1.5px dashed var(--ink)}
+.line small{display:block;font:500 12px/1.3 var(--sans);color:var(--soft);margin-top:6px}
+
+.ord{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:8px;counter-reset:o}
+.ord li{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;border:1.5px solid var(--ink);padding:8px 8px 8px 10px;background:var(--paper)}
+.ord li::before{counter-increment:o;content:counter(o);font:700 18px/1 var(--mono)}
+.ord li b{font-weight:700}
+.ord .mv{display:flex;gap:6px}
+.ord .mv button{width:40px;height:40px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);font:700 16px/1 var(--sans);cursor:pointer}
+.ord .mv button:hover:not(:disabled){background:var(--hl)} .ord .mv button:disabled{opacity:.25;cursor:default}
+.ord li.right{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)} .ord li.wrong{border-color:var(--stamp);box-shadow:inset 4px 0 0 var(--stamp)}
+.ord li .v{font:600 13px/1.2 var(--mono);color:var(--soft);text-align:right}
+.ends{display:flex;justify-content:space-between;font:700 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin:-4px 0 8px}
+
+.field{display:flex;gap:8px;margin:0 0 10px}
+.field input{flex:1;min-width:0;font:600 20px/1 var(--mono);padding:14px 12px;border:2px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:0}
+.unit{font:500 13px/1.3 var(--sans);color:var(--soft);margin:0 0 18px}
+
+.verdict{border:2px solid var(--ink);padding:16px;margin:0 0 18px;position:relative}
+.verdict .pts{font:700 40px/1 var(--mono)}
+.verdict .pts small{font-size:16px;color:var(--soft)}
+.verdict .tag{display:inline-block;font:800 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;padding:5px 7px;margin:0 0 10px;background:var(--ink);color:var(--paper)}
+.verdict .tag.good{background:var(--ok)} .verdict .tag.bad{background:var(--stamp)}
+.verdict p{margin:8px 0 0}
+.tiers{margin:0 0 18px;display:grid;gap:6px}
+.tiers div{font:500 14px/1.4 var(--sans)}
+.tiers div b{font:800 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;display:block;margin:0 0 3px;color:var(--soft)}
+.tiers div{border-top:1px solid var(--faint);padding-top:6px}
+.tiers div.you{background:var(--hl);padding:2px 4px;margin:0 -4px}
+
+.rules{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:6px 0 14px;margin:0 0 22px}
+.rules h2,.end h2{font:800 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;margin:12px 0 8px}
+.rules ol{margin:0;padding-left:22px}
+.rules li{margin:4px 0}
+.rules .tierkey{font:500 13px/1.5 var(--sans);color:var(--soft);margin:10px 0 0}
+.end .big{font:700 clamp(56px,18vw,88px)/1 var(--mono);text-align:center;margin:6px 0 2px}
+.end .big small{font-size:.35em;color:var(--soft)}
+.end .hed{text-align:center;font:italic 700 20px/1.3 var(--serif);margin:0 0 18px}
+.recap{width:100%;border-collapse:collapse;margin:0 0 20px;font:500 14px/1.35 var(--sans)}
+.recap td{border-top:1px solid var(--faint);padding:7px 4px;vertical-align:top}
+.recap td:last-child{text-align:right;font:600 14px/1.35 var(--mono);white-space:nowrap}
+.recap td:first-child{width:22px}
+.share{font:500 14px/1.5 var(--mono);white-space:pre-wrap;border:1.5px dashed var(--ink);padding:12px;margin:0 0 12px}
+.msg{font:600 14px/1.4 var(--sans);min-height:20px;margin:10px 0}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--stamp)}
+.next{font:italic 400 15px/1.4 var(--serif);color:var(--soft);margin-top:18px}
+@media (prefers-reduced-motion: reduce){.timer span{transition:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="ears"><a href="./">← The Daily Rack</a><span id="ed"></span></div>
+  <div class="mast">The Scoop</div>
+  <p class="motto">Seven questions. Twenty-five seconds each. Beat the paper.</p>
+  <div class="band"><div class="dots" id="dots" aria-hidden="true"></div><span class="tot" id="tot"></span></div>
+  <main id="app" aria-live="polite"></main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ================= Question bank =================
+   Every day uses 2 Over/Under, 2 Name One, 2 Rank It and 1 Closest Guess.
+   To add questions, append to a list below. The daily rotation picks through each list in order. */
+
+/* Over/Under: is the real number over or under the line? */
+const OU=[
+ {q:"Wayne Gretzky's career NHL regular-season goals",line:850,a:894,f:"894. Alex Ovechkin passed him in April 2025."},
+ {q:"Bones in the adult human body",line:200,a:206,f:"206. Babies start with closer to 300; many fuse as they grow."},
+ {q:"The year Cornell University was founded",line:1870,a:1865,f:"1865, by Ezra Cornell and Andrew Dickson White."},
+ {q:"Length of a marathon, in miles",line:26.5,a:26.2,f:"26.2 miles (42.195 km)."},
+ {q:"U.S. states that border Canada",line:11.5,a:13,f:"13, counting Ohio and Pennsylvania across Lake Erie, and Alaska."},
+ {q:"Keys on a standard piano",line:90,a:88,f:"88: 52 white and 36 black."},
+ {q:"Height of Mount Everest, in feet",line:30000,a:29032,f:"29,032 feet, per the 2020 survey."},
+ {q:"Countries in the European Union",line:25.5,a:27,f:"27, since the UK left in 2020."},
+ {q:"Speed of sound at sea level, in mph",line:700,a:767,f:"About 767 mph at room temperature."},
+ {q:"Average distance from Earth to the Moon, in miles",line:250000,a:238855,f:"About 238,855 miles."},
+ {q:"Lines in a Shakespearean sonnet",line:12.5,a:14,f:"14: three quatrains and a couplet."},
+ {q:"Babe Ruth's career home runs",line:700,a:714,f:"714. The record stood until Hank Aaron passed it in 1974."},
+ {q:"Time zones in Russia",line:9.5,a:11,f:"11, the most of any country's mainland."},
+ {q:"Height of the Empire State Building to its tip, in feet",line:1300,a:1454,f:"1,454 feet with the antenna; 1,250 to the roof."}
+];
+
+/* Name One: rarer accepted answers score more.
+   Tiers: 10 Old News, 30 Wire Story, 60 Front Page, 100 Exclusive. Each answer: [name, points, [other accepted spellings]] */
+const OPEN=[
+ {q:"Name an Ivy League school",a:[["Harvard",10],["Yale",10],["Princeton",30],["Columbia",30],["Cornell",30],["Penn",60,["upenn","university of pennsylvania","pennsylvania","u penn"]],["Brown",60],["Dartmouth",100]]},
+ {q:"Name a planet in our solar system",a:[["Mars",10],["Earth",10],["Jupiter",10],["Saturn",30],["Venus",30],["Uranus",30],["Mercury",60],["Neptune",60]],no:{pluto:"Pluto was demoted to dwarf planet in 2006."}},
+ {q:"Name an NHL team",a:[
+   ["Bruins",10,["boston","boston bruins"]],["Rangers",10,["new york rangers","nyr"]],["Maple Leafs",10,["leafs","toronto","toronto maple leafs"]],["Canadiens",10,["habs","montreal","montreal canadiens"]],["Blackhawks",10,["chicago","chicago blackhawks"]],
+   ["Penguins",30,["pittsburgh","pens","pittsburgh penguins"]],["Red Wings",30,["detroit","detroit red wings"]],["Flyers",30,["philadelphia","philly","philadelphia flyers"]],["Oilers",30,["edmonton","edmonton oilers"]],["Capitals",30,["washington","caps","washington capitals"]],["Lightning",30,["tampa","tampa bay","tampa bay lightning","bolts"]],["Avalanche",30,["colorado","avs","colorado avalanche"]],["Golden Knights",30,["vegas","vegas golden knights","knights"]],["Islanders",30,["new york islanders","isles","nyi"]],["Devils",30,["new jersey","new jersey devils"]],["Kings",30,["los angeles","la kings","los angeles kings"]],
+   ["Canucks",60,["vancouver","vancouver canucks"]],["Flames",60,["calgary","calgary flames"]],["Stars",60,["dallas","dallas stars"]],["Sabres",60,["buffalo","buffalo sabres"]],["Panthers",60,["florida","florida panthers"]],["Wild",60,["minnesota","minnesota wild"]],["Blues",60,["st louis","saint louis","st louis blues"]],["Sharks",60,["san jose","san jose sharks"]],["Ducks",60,["anaheim","anaheim ducks"]],["Senators",60,["ottawa","sens","ottawa senators"]],["Jets",60,["winnipeg","winnipeg jets"]],["Predators",60,["nashville","preds","nashville predators"]],["Hurricanes",60,["carolina","canes","carolina hurricanes"]],
+   ["Blue Jackets",100,["columbus","cbj","columbus blue jackets"]],["Kraken",100,["seattle","seattle kraken"]],["Mammoth",100,["utah","utah mammoth"]]]},
+ {q:"Name a U.S. state that starts with M",a:[["Michigan",10],["Massachusetts",10],["Maine",30],["Montana",30],["Minnesota",30],["Maryland",30],["Mississippi",60],["Missouri",60]]},
+ {q:"Name a member of the Beatles (any era)",a:[["John Lennon",10,["john","lennon"]],["Paul McCartney",10,["paul","mccartney"]],["George Harrison",30,["george","harrison"]],["Ringo Starr",30,["ringo","starr"]],["Pete Best",100,["pete","best"]],["Stuart Sutcliffe",100,["stuart","stu","sutcliffe","stu sutcliffe"]]]},
+ {q:"Name a country in South America",a:[["Brazil",10],["Argentina",10],["Chile",30],["Peru",30],["Colombia",30],["Venezuela",60],["Ecuador",60],["Bolivia",60],["Uruguay",60],["Paraguay",100],["Guyana",100],["Suriname",100]],no:{"french guiana":"French Guiana is part of France, not its own country.",mexico:"Mexico is in North America."}},
+ {q:"Name a piece in chess",a:[["King",10],["Queen",10],["Pawn",30],["Knight",30,["horse"]],["Bishop",60],["Rook",60,["castle"]]]},
+ {q:"Name a U.S. president who served after 1950",a:[["Donald Trump",10,["trump"]],["Barack Obama",10,["obama"]],["Joe Biden",10,["biden"]],["Ronald Reagan",30,["reagan"]],["Bill Clinton",30,["clinton"]],["John F. Kennedy",30,["kennedy","jfk","john kennedy"]],["George Bush",30,["bush","george w bush","george hw bush","george h w bush"]],["Richard Nixon",30,["nixon"]],["Jimmy Carter",60,["carter"]],["Dwight Eisenhower",60,["eisenhower","ike"]],["Lyndon Johnson",60,["johnson","lbj"]],["Gerald Ford",100,["ford"]],["Harry Truman",100,["truman"]]]},
+ {q:"Name a pro sports team from Boston",a:[["Red Sox",10,["sox","boston red sox"]],["Celtics",10,["boston celtics"]],["Patriots",10,["pats","new england patriots"]],["Bruins",10,["boston bruins"]],["Revolution",60,["revs","new england revolution"]],["Fleet",100,["boston fleet","pwhl boston"]],["Legacy",100,["boston legacy","boston legacy fc"]],["Cannons",100,["boston cannons"]]]},
+ {q:"Name a founding member of NATO (1949)",a:[["United States",10,["usa","us","america","united states of america"]],["United Kingdom",10,["uk","britain","great britain","england"]],["France",10],["Canada",10],["Italy",30],["Belgium",60],["Netherlands",60,["holland"]],["Norway",60],["Denmark",60],["Portugal",60],["Luxembourg",100],["Iceland",100]],no:{germany:"West Germany joined in 1955.",turkey:"Turkey joined in 1952.",greece:"Greece joined in 1952.",spain:"Spain joined in 1982."}},
+ {q:"Name one of the Great Lakes",a:[["Michigan",10],["Superior",10],["Erie",30],["Ontario",30],["Huron",60]]},
+ {q:"Name a color of the rainbow",a:[["Red",10],["Blue",10],["Green",10],["Yellow",30],["Orange",30],["Violet",60,["purple"]],["Indigo",100]]},
+ {q:"Name a noble gas",a:[["Helium",10],["Neon",10],["Argon",30],["Krypton",60],["Xenon",60],["Radon",100],["Oganesson",100]]},
+ {q:"Name a borough of New York City",a:[["Manhattan",10],["Brooklyn",10],["Queens",30],["The Bronx",30,["bronx"]],["Staten Island",100]]}
+];
+
+/* Rank It: items listed in the correct order, smallest first. [label, value shown at reveal] */
+const ORDER=[
+ {q:"Rank these planets by size",lo:"Smallest",hi:"Largest",i:[["Mars","4,212 mi wide"],["Earth","7,918 mi"],["Neptune","30,599 mi"],["Jupiter","86,881 mi"]]},
+ {q:"Rank these schools by founding year",lo:"Oldest",hi:"Newest",i:[["Harvard","1636"],["Yale","1701"],["Princeton","1746"],["Cornell","1865"]]},
+ {q:"Rank these cities by population",lo:"Smallest",hi:"Largest",i:[["Ithaca","~32,000"],["Buffalo","~275,000"],["Boston","~650,000"],["New York City","~8.3 million"]]},
+ {q:"Rank these rivers by length",lo:"Shortest",hi:"Longest",i:[["Thames","215 mi"],["Rhine","~766 mi"],["Mississippi","~2,340 mi"],["Nile","~4,130 mi"]]},
+ {q:"Rank these landmarks by height",lo:"Shortest",hi:"Tallest",i:[["Statue of Liberty","305 ft"],["Big Ben's tower","316 ft"],["Eiffel Tower","1,083 ft"],["Burj Khalifa","2,717 ft"]]},
+ {q:"Rank these inventions by year",lo:"Earliest",hi:"Latest",i:[["Telephone","1876"],["Airplane","1903"],["Television","1927"],["iPhone","2007"]]},
+ {q:"Rank these by top speed",lo:"Slowest",hi:"Fastest",i:[["House cat","~30 mph"],["Racehorse","~55 mph"],["Cheetah","~70 mph"],["Peregrine falcon (diving)","~240 mph"]]},
+ {q:"Rank these oceans by size",lo:"Smallest",hi:"Largest",i:[["Arctic","5.4M sq mi"],["Indian","27M sq mi"],["Atlantic","41M sq mi"],["Pacific","63M sq mi"]]},
+ {q:"Rank these sports by players per team on the field",lo:"Fewest",hi:"Most",i:[["Basketball","5"],["Hockey","6"],["Baseball","9"],["Soccer","11"]]},
+ {q:"Rank these events by year",lo:"Earliest",hi:"Latest",i:[["Declaration of Independence","1776"],["Civil War begins","1861"],["World War I begins","1914"],["World War II ends","1945"]]},
+ {q:"Rank these mountains by height",lo:"Shortest",hi:"Tallest",i:[["Mount Washington","6,288 ft"],["Mount Whitney","14,505 ft"],["Kilimanjaro","19,341 ft"],["Everest","29,032 ft"]]},
+ {q:"Rank these countries by area",lo:"Smallest",hi:"Largest",i:[["United Kingdom","94K sq mi"],["France","249K sq mi"],["India","1.27M sq mi"],["Canada","3.86M sq mi"]]},
+ {q:"Rank these by launch year",lo:"Earliest",hi:"Latest",i:[["Facebook","2004"],["YouTube","2005"],["Twitter","2006"],["Instagram","2010"]]},
+ {q:"Rank these by year",lo:"Earliest",hi:"Latest",i:[["Moon landing","1969"],["Berlin Wall falls","1989"],["Google founded","1998"],["First iPhone","2007"]]}
+];
+
+/* Closest Guess: points fall off evenly until you're "tol" away from the answer, then hit 0. */
+const CLOSE=[
+ {q:"How many miles is it from New York City to Los Angeles, as the crow flies?",a:2450,tol:1000,u:"miles",f:"About 2,450 miles in a straight line; about 2,800 by car."},
+ {q:"About how many people live in the city of Ithaca, NY?",a:32108,tol:30000,u:"people",f:"32,108 in the 2020 census."},
+ {q:"How tall is the Statue of Liberty from the ground to the tip of the torch?",a:305,tol:200,u:"feet",f:"305 feet; the statue alone is 151."},
+ {q:"In what year did Pac-Man first come out?",a:1980,tol:20,u:"year",f:"1980, in Japan."},
+ {q:"How far is the pitcher's mound from home plate in MLB?",a:60.5,tol:20,u:"feet",f:"60 feet, 6 inches."},
+ {q:"In what year was the Eiffel Tower finished?",a:1889,tol:40,u:"year",f:"1889, for the World's Fair in Paris."},
+ {q:"How long is an NHL rink?",a:200,tol:100,u:"feet",f:"200 feet long by 85 wide."}
+];
+
+/* ================= Daily edition ================= */
+const SECS=25, TIERS={10:"Old News",30:"Wire Story",60:"Front Page",100:"Exclusive"};
+const TYPES={ou:"Over / Under",open:"Name One",order:"Rank It",close:"Closest Guess"};
+const now=new Date();
+const DAY=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+const NO=Math.max(1,Math.round((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())-Date.UTC(2026,10,11))/864e5)+1);
+const d=NO-1, at=(L,i)=>L[i%L.length];
+const ROUNDS=[["ou",at(OU,2*d)],["open",at(OPEN,2*d)],["order",at(ORDER,2*d)],["close",at(CLOSE,d)],
+  ["ou",at(OU,2*d+1)],["open",at(OPEN,2*d+1)],["order",at(ORDER,2*d+1)]].map(([t,q])=>({t,q}));
+/* Same scrambled order for everyone today, never already solved */
+function rng(s){return()=>(s=(s*1664525+1013904223)>>>0)/4294967296}
+ROUNDS.forEach((r,k)=>{if(r.t!=="order")return;const R=rng(NO*31+k);let p;
+  do{p=[0,1,2,3];for(let i=3;i>0;i--){const j=Math.floor(R()*(i+1));[p[i],p[j]]=[p[j],p[i]]}}while(p.join()==="0,1,2,3");r.start=p});
+
+/* ================= State (one play per day) ================= */
+const KEY="daily-rack-scoop";
+let S=(()=>{try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.day===DAY)return s}catch(e){}return {day:DAY,no:NO,i:-1,res:[],until:null,view:"intro"}})();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const total=()=>S.res.reduce((a,r)=>a+(r?r.pts:0),0);
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+const sq=p=>p>=90?"🟩":p>=50?"🟨":p>0?"🟧":"⬛";
+const cls=p=>p>=90?"g":p>=50?"y":p>0?"o":"x";
+
+/* ================= Scoring ================= */
+const norm=t=>String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ").replace(/[^a-z0-9 ]/g," ")
+  .replace(/\s+/g," ").trim().replace(/^the /,"").replace(/ (university|college)$/,"").replace(/^(university|college) of /,"");
+function lev(a,b){if(Math.abs(a.length-b.length)>1)return 9;const m=[...Array(b.length+1).keys()];
+  for(let i=1;i<=a.length;i++){let p=m[0];m[0]=i;for(let j=1;j<=b.length;j++){const t=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return m[b.length]}
+function matchOpen(q,txt){const x=norm(txt);if(!x)return null;
+  for(const [name,pts,al] of q.a){const keys=[name,...(al||[])].map(norm);if(keys.includes(x))return {name,pts}}
+  if(x.length>=5)for(const [name,pts,al] of q.a){const keys=[name,...(al||[])].map(norm).filter(k=>k.length>=5);if(keys.some(k=>lev(x,k)<=1))return {name,pts}}
+  return null}
+function score(r,ans){const q=r.q;
+  if(r.t==="ou"){const right=ans===(q.a>q.line?"over":"under");return {pts:right?100:0,ans}}
+  if(r.t==="order"){const pos=ans||r.start;const ok=pos.map((v,k)=>v===k);return {pts:25*ok.filter(Boolean).length,ans:pos}}
+  if(r.t==="close"){const g=parseFloat(String(ans??"").replace(/[^0-9.\-]/g,""));if(!isFinite(g))return {pts:0,ans:null};
+    return {pts:Math.max(0,Math.round(100*(1-Math.abs(g-q.a)/q.tol))),ans:g}}
+  if(r.t==="open"){const m=matchOpen(q,ans||"");return {pts:m?m.pts:0,ans:ans||"",hit:m?m.name:null}}}
+
+/* ================= Render ================= */
+let tick=null, cur=null;
+function header(){
+  $("#ed").textContent=`No. ${NO} · ${now.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}`;
+  $("#dots").innerHTML=ROUNDS.map((_,k)=>{const r=S.res[k];return `<i class="${r?cls(r.pts):k===S.i?"now":""}"></i>`}).join("");
+  $("#tot").innerHTML=`<b>${total()}</b> / 700`;
+}
+function go(view){S.view=view;save();render()}
+function render(){clearInterval(tick);header();
+  if(S.view==="intro")return intro();
+  if(S.view==="q")return question();
+  if(S.view==="reveal")return reveal();
+  return end()}
+
+function intro(){
+  $("#app").innerHTML=`<div class="rules"><h2>How to play</h2><ol>
+    <li><b>Over / Under:</b> is the real number higher or lower than the line?</li>
+    <li><b>Rank It:</b> put four things in order.</li>
+    <li><b>Closest Guess:</b> type a number. The closer, the more points.</li>
+    <li><b>Name One:</b> any right answer counts, but the less obvious it is, the more it scores.</li></ol>
+    <p class="tierkey">Name One tiers: Old News 10 · Wire Story 30 · Front Page 60 · Exclusive 100.<br>
+    Each round is worth up to 100 points and has a 25-second clock. One play per day.</p></div>
+    <button class="btn" id="start">Start today's edition</button>`;
+  $("#start").onclick=()=>{S.i=0;startRound()}}
+
+function startRound(){S.until=Date.now()+SECS*1000;cur=null;go("q")}
+
+function question(){
+  const r=ROUNDS[S.i],q=r.q;let body="";
+  if(r.t==="ou")body=`<div class="line">${fmt(q.line)}<small>the line</small></div>
+    <div class="ou"><button data-ou="over">▲ Over<small>more than ${fmt(q.line)}</small></button><button data-ou="under">▼ Under<small>less than ${fmt(q.line)}</small></button></div>`;
+  if(r.t==="order"){cur=cur||[...r.start];body=`<div class="ends"><span>↑ ${esc(q.lo)}</span></div><ol class="ord" id="ord"></ol><div class="ends"><span>↓ ${esc(q.hi)}</span></div>
+    <button class="btn" id="lock">Lock it in</button>`}
+  if(r.t==="close")body=`<form id="f"><div class="field"><input id="in" inputmode="decimal" autocomplete="off" placeholder="Your guess" aria-label="Your guess in ${esc(q.u)}"><button class="btn">Guess</button></div></form><p class="unit">Answer in ${esc(q.u)}.</p>`;
+  if(r.t==="open")body=`<form id="f"><div class="field"><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer" aria-label="Your answer"><button class="btn">File it</button></div></form><p class="unit">One answer. Skip the obvious if you can.</p>`;
+  $("#app").innerHTML=`<p class="kicker k2"><span>Round ${S.i+1} of 7 · ${TYPES[r.t]}</span><span class="secs" id="secs"></span></p><h1 class="q">${esc(q.q)}${r.t==="ou"?"…":""}</h1>
+    <div class="timer" id="tm"><span></span></div>${body}`;
+  if(r.t==="ou")document.querySelectorAll("[data-ou]").forEach(b=>b.onclick=()=>submit(b.dataset.ou));
+  if(r.t==="order"){drawOrder();$("#lock").onclick=()=>submit(cur)}
+  if(r.t==="close"||r.t==="open"){const i=$("#in");setTimeout(()=>i.focus(),30);$("#f").onsubmit=e=>{e.preventDefault();if(i.value.trim())submit(i.value)}}
+  const run=()=>{const left=Math.max(0,S.until-Date.now());const tm=$("#tm");if(!tm)return;
+    tm.firstChild.style.width=`${left/(SECS*10)}%`;tm.classList.toggle("low",left<6000);$("#secs").textContent=`${Math.ceil(left/1000)}s`;
+    if(left<=0){clearInterval(tick);const r2=ROUNDS[S.i];
+      submit(r2.t==="order"?cur:(r2.t==="ou"?null:($("#in")?.value||"")))}};
+  run();tick=setInterval(run,100)}
+
+function drawOrder(){const r=ROUNDS[S.i];
+  $("#ord").innerHTML=cur.map((v,k)=>`<li><b>${esc(r.q.i[v][0])}</b><span class="mv">
+    <button data-mv="${k}" data-d="-1" aria-label="Move ${esc(r.q.i[v][0])} up" ${k===0?"disabled":""}>↑</button>
+    <button data-mv="${k}" data-d="1" aria-label="Move ${esc(r.q.i[v][0])} down" ${k===3?"disabled":""}>↓</button></span></li>`).join("");
+  document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const k=+b.dataset.mv,j=k+ +b.dataset.d;[cur[k],cur[j]]=[cur[j],cur[k]];drawOrder();
+    document.querySelector(`[data-mv="${j}"][data-d="${b.dataset.d}"]`)?.focus()||document.querySelector(`[data-mv="${j}"]`)?.focus()})}
+
+function submit(ans){clearInterval(tick);if(S.view!=="q")return;
+  S.res[S.i]=score(ROUNDS[S.i],ans);S.until=null;go("reveal")}
+
+function reveal(){
+  const r=ROUNDS[S.i],q=r.q,res=S.res[S.i],p=res.pts;let tag,detail="";
+  if(r.t==="ou"){tag=res.ans==null?["Time's up","bad"]:p?["Correct","good"]:["Wrong side","bad"];
+    detail=`<p><b>${q.a>q.line?"Over":"Under"}.</b> ${esc(q.f)}</p>`}
+  if(r.t==="close"){tag=res.ans==null?["No guess","bad"]:p>=90?["Bang on","good"]:p>=50?["Close","good"]:p>0?["In the neighborhood",""]:["Way off","bad"];
+    detail=`<p>${res.ans!=null?`You said <b>${fmt(res.ans)}</b>. `:""}${esc(q.f)}</p>`}
+  if(r.t==="order"){tag=p===100?["Perfect order","good"]:p?[`${p/25} of 4 in place`,""]:["None in place","bad"];
+    detail=`<ol class="ord">${q.i.map((it,k)=>`<li class="${res.ans[k]===k?"right":"wrong"}"><b>${esc(it[0])}</b><span class="v">${esc(it[1])}</span></li>`).join("")}</ol>
+      ${p<100?`<p class="unit">You had: ${res.ans.map(v=>esc(q.i[v][0])).join(" → ")}</p>`:""}`}
+  if(r.t==="open"){const why=(q.no||{})[norm(res.ans)];
+    tag=res.hit?[TIERS[p],p>=60?"good":""]:[res.ans?"Not on our list":"Time's up","bad"];
+    detail=`<p>${res.ans?`You filed <b>${esc(res.ans)}</b>${res.hit&&norm(res.hit)!==norm(res.ans)?` (${esc(res.hit)})`:""}.`:""} ${why?esc(why):""}</p>`;
+    const groups=[100,60,30,10].map(t=>({t,n:q.a.filter(a=>a[1]===t).map(a=>a[0])})).filter(g=>g.n.length);
+    detail+=`</div><div class="tiers">${groups.map(g=>`<div class="${res.hit&&g.n.includes(res.hit)?"you":""}"><b>${TIERS[g.t]} · ${g.t}</b>${g.n.map(esc).join(", ")}</div>`).join("")}`}
+  const last=S.i===6;
+  $("#app").innerHTML=`<p class="kicker">Round ${S.i+1} of 7 · ${TYPES[r.t]}</p><h1 class="q">${esc(q.q)}${r.t==="ou"?`… ${fmt(q.line)}`:""}</h1>
+    <div class="verdict"><span class="tag ${tag[1]}">${esc(tag[0])}</span><div class="pts">+${p}<small> pts</small></div>${r.t==="order"?"</div>"+detail:detail+(r.t==="open"?"</div>":"</div>")}
+    <button class="btn" id="nx">${last?"See today's edition":"Next round"} →</button>`;
+  $("#nx").onclick=()=>{if(last)go("end");else{S.i++;startRound()}};setTimeout(()=>$("#nx").focus(),30)}
+
+function shareText(){return `The Scoop #${NO} · ${total()}/700\n${S.res.map(r=>sq(r.pts)).join("")}\nmsg286-ux.github.io/Daily-Rack/scoop.html`}
+function headline(t){return t>=600?"Stop the presses.":t>=480?"Front-page material.":t>=350?"A solid day on the beat.":t>=200?"Buried on page six.":"Retraction to follow."}
+
+function end(){const t=total();
+  $("#app").innerHTML=`<div class="end"><p class="kicker" style="text-align:center">Edition No. ${NO} · Final</p>
+    <div class="big">${t}<small>/700</small></div><p class="hed">${headline(t)}</p>
+    <table class="recap">${ROUNDS.map((r,k)=>`<tr><td>${sq(S.res[k].pts)}</td><td>${esc(r.q.q)}</td><td>${S.res[k].pts}</td></tr>`).join("")}</table>
+    <h2>Your share</h2><div class="share" id="sh">${esc(shareText())}</div>
+    <div class="row"><button class="btn" id="cp">Copy result</button><a class="btn ghost" href="./" style="text-decoration:none;display:inline-flex;align-items:center">Back to the paper</a></div>
+    <div class="msg" id="msg"></div><p class="next" id="nxt"></p></div>`;
+  $("#cp").onclick=async()=>{try{await navigator.clipboard.writeText(shareText());say("Copied. Paste it anywhere.",true)}
+    catch(e){const r=document.createRange();r.selectNodeContents($("#sh"));const s=getSelection();s.removeAllRanges();s.addRange(r);say("Selected. Copy it from here.",true)}};
+  const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const h=Math.floor((m-n)/36e5),mi=Math.floor((m-n)%36e5/6e4);
+  $("#nxt").textContent=`Next edition in ${h}h ${mi}m.`;
+  file()}
+function say(t,ok){const m=$("#msg");if(m){m.textContent=t;m.className="msg "+(ok?"ok":"bad")}}
+
+/* Log straight to the Daily Rack rankings when signed in (same press pass as the main page) */
+async function file(){
+  if(S.filed){say("Filed to today's Daily Rack rankings.",true);return}
+  if(!window.supabase){say("Couldn't reach the Daily Rack. Copy your result and paste it on the front page.",false);return}
+  const sb=window.supabase.createClient("https://zycnmucgmhwkrulqdluc.supabase.co","sb_publishable_BnklB2jMV3inRrCodEYdCA_UnO5jRgB",{auth:{persistSession:true,autoRefreshToken:true}});
+  const {data}=await sb.auth.getSession();const me=data.session?.user;
+  if(!me){$("#msg").className="msg";$("#msg").innerHTML=`Sign in on <a href="./">the front page</a> to post this to the rankings, then paste your result there.`;return}
+  const t=total();
+  const {error}=await sb.from("results").upsert({user_id:me.id,day:DAY,game:"scoop",score:`${t}/700`,rank:-t,grid:S.res.map(r=>sq(r.pts)).join("")},{onConflict:"user_id,day,game"});
+  if(error){say("Couldn't file it automatically. Copy your result and paste it on the front page.",false);return}
+  S.filed=true;save();say("Filed to today's Daily Rack rankings.",true)}
+
+/* A new day while the tab is open starts a fresh edition */
+setInterval(()=>{const n=new Date();const k=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;if(k!==DAY&&S.view!=="q")location.reload()},60000);
+/* Coming back mid-round keeps the same clock (refreshing doesn't buy more time) */
+if(S.view==="q"&&!S.until)S.until=Date.now();
+render();
+</script>
+</body>
+</html>

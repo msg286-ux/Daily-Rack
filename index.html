@@ -269,6 +269,7 @@ body{margin:0}
 .panel[data-g="noillirk"]{--sig:#8ec9f0}.panel[data-g="noillirk"] .art .h{fill:#ff8fa3}
 .panel[data-g="sizeitup"]{--sig:#ffb02e}.panel[data-g="sizeitup"] .art .h{fill:#ffb02e}
 .panel[data-g="pour"]{--sig:#8b6cf0}.panel[data-g="pour"] .art .h{fill:#f5b83d}
+.panel[data-g="scoop"]{--sig:#c4122f}.panel[data-g="scoop"] .art .h{fill:#f2d54b}
 .panel[data-g="krillion"]{--sig:#1f5d8c}.panel[data-g="krillion"] .art .h{fill:#ff7f8e}
 .panel[data-g="ig_baseball"]{--sig:#1e3a6e}.panel[data-g="ig_baseball"] .art .h{fill:#e03a3e}
 .panel[data-g="ig_football"]{--sig:#2f6b3a}.panel[data-g="ig_football"] .art .h{fill:#b5793f}
@@ -357,6 +358,7 @@ body{background-color:var(--paper);background-image:url("data:image/svg+xml,%3Cs
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 const GAMES=[
+ {id:"scoop",name:"The Scoop",src:"Daily Rack",cat:"House",url:"scoop.html",house:true},
  {id:"wordle",name:"Wordle",src:"NYT",cat:"NYT",url:"https://www.nytimes.com/games/wordle/index.html"},
  {id:"connections",name:"Connections",src:"NYT",cat:"NYT",url:"https://www.nytimes.com/games/connections"},
  {id:"strands",name:"Strands",src:"NYT",cat:"NYT",url:"https://www.nytimes.com/games/strands"},
@@ -446,6 +448,7 @@ const PARSERS={
  pour:t=>{if(!/\bPOUR\b|mayhex\.gg\/pour/i.test(t))return null;
    const m=t.match(/(\d{1,3})\s*(?:\/\s*500|pts?\b|points)/i)||t.match(/\bPOUR\b[^\n]*\n\s*(\d{1,3})\s*(?:\n|$)/i)||t.match(/\bPOUR\b[^\n\d]*?#?\d*[^\n\d]*?\b(\d{2,3})\b(?![\/:%])/i);
    if(!m)return {score:null,rank:null};const v=+m[1];if(v>500)return {score:null,rank:null};return {score:`${v} pts`,rank:-v}},
+ scoop:t=>{const m=t.match(/The Scoop\s*#?\d*\s*[·\-|]?\s*(\d{1,3})\s*\/\s*700/i);if(!m)return null;const v=+m[1];return {score:`${v}/700`,rank:-v}},
  krillion:t=>{if(!/Krillion/i.test(t))return null;
    const m=t.match(/Krillion\s*#?\d+[^\n]*\n\s*([\d,]+)\s*(?:\n|$)/i);
    if(m){const v=+m[1].replace(/,/g,"");return {score:`${v.toLocaleString()} pts`,rank:-v}}
@@ -487,7 +490,8 @@ const SCORING={
  ig_basketball:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
  ig_hockey:{col:"Correct",rule:"Most correct squares wins (9 max). If tied, the lower rarity score wins."},
  pour:{col:"Points",rule:"Most points wins (500 max). The closer your line to where the liquid settles, the more you score."},
- krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."}
+ krillion:{col:"Points",rule:"Most points wins. Rarer answers dive deeper."},
+ scoop:{col:"Points",rule:"Most points wins (700 max). Seven rounds; less obvious answers score more."}
 };
 /* Keep just the emoji grid lines from a share, never links or words */
 function shareGrid(t){return t.split(/\n/).map(l=>l.trim()).filter(l=>l&&!/[A-Za-z0-9]/.test(l)&&/[^\x00-\x7F]/.test(l)).slice(0,8).join("\n").slice(0,300)}
@@ -550,6 +554,7 @@ const ART={
    <path d="M70 28 q6 10 10 26" class="s" style="stroke:var(--hl);stroke-width:3"/>
    <path d="M78 34 l6 42 h26 l6 -42z" class="o" style="stroke:var(--ink);stroke-width:1.6"/><path d="M80 60 l3 16 h26 l3 -16z" class="h"/>
    <line x1="72" y1="52" x2="124" y2="52" class="s" style="stroke-dasharray:3 2"/><circle cx="124" cy="52" r="3" class="k"/>`),
+ scoop:()=>V(130,90,`<circle cx="36" cy="48" r="27" class="o"/><rect x="31" y="14" width="10" height="6" class="k"/><path d="M36 48 L36 28" class="s"/><path d="M36 48 A20 20 0 0 1 36 28 Z" class="h"/><text x="36" y="62" class="t">25s</text>`+`<rect x="76" y="12" width="50" height="16" class="k"/><text x="101" y="20" class="tk">▲ OVER</text>`+[0,1,2].map(i=>`<rect x="76" y="${36+i*12}" width="${50-i*10}" height="8" class="${i===0?"h":"o"}"/>`).join("")+`<text x="101" y="80" class="t">EXCLUSIVE</text>`),
  krillion:()=>V(130,90,`<path d="M0 12 q12 -8 24 0 t24 0 t24 0 t24 0 t24 0 t10 0" class="s"/>`+[30,48,66,84].map((y,i)=>`<line x1="2" y1="${y}" x2="10" y2="${y}" class="s"/><text x="14" y="${y}" class="t" style="font-size:7px;text-anchor:start">${(i+1)*200}m</text>`).join("")+`<path d="M62 62 q16 -13 34 -2 q-9 11 -34 2z" class="h" style="stroke:var(--ink);stroke-width:1.6"/><path d="M62 62 l-11 -7 l2 7 l-2 7z" class="k"/><circle cx="90" cy="59" r="2" class="k"/><path d="M93 56 q11 -11 20 -9 M93 58 q13 -5 20 0" class="s"/><circle cx="78" cy="40" r="2.5" class="s"/><circle cx="84" cy="30" r="1.8" class="s"/>`),
  poeltl:()=>V(80,80,`<circle cx="40" cy="40" r="32" class="h" style="stroke:var(--ink);stroke-width:1.6"/><line x1="8" y1="40" x2="72" y2="40" class="s"/><line x1="40" y1="8" x2="40" y2="72" class="s"/><path d="M17 17 q14 23 0 46" class="s"/><path d="M63 17 q-14 23 0 46" class="s"/><text x="40" y="40" class="t" style="font-size:18px;font-family:var(--serif)">?</text>`)
 };
@@ -574,7 +579,7 @@ const loginFor = u => `${u.toLowerCase()}@${LOGIN_DOMAIN}`;
 
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const SECTION_NAMES = { NYT: "The Times Puzzles", Web: "Around the Web", Sports: "Sports" };
+const SECTION_NAMES = { House: "Our Own Puzzle", NYT: "The Times Puzzles", Web: "Around the Web", Sports: "Sports" };
 const ORD = n => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/, USER_RE = /^[A-Za-z0-9_.]{2,16}$/;
 
@@ -640,7 +645,7 @@ function render() {
           ${L ? `<div class="leader">Leader: ${esc(L.profiles?.username || "someone")} · ${esc(L.score || "")}</div>` : ""}
           <div class="go">${e ? "Play again" : "Play"} →</div></div>
           <div class="pbtns">${e ? "" : `<button class="pbtn" data-act="log" data-id="${g.id}">Log</button>`}<button class="pbtn" data-act="rank" data-id="${g.id}">Rankings</button></div></div>
-        <a class="cover" href="${g.url}" target="_blank" rel="noopener" aria-label="Play ${g.name}"></a>
+        <a class="cover" href="${g.url}"${g.house ? "" : ` target="_blank" rel="noopener"`} aria-label="Play ${g.name}"></a>
         ${e ? `<div class="stamp${fresh === g.id ? " fresh" : ""}"><b>Solved</b></div>` : ""}
       </article>`; }).join("")}</div></section>`;
   }).join("");

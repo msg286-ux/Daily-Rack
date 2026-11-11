@@ -8,7 +8,7 @@ const loginFor = u => `${u.toLowerCase()}@${LOGIN_DOMAIN}`;
 
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const SECTION_NAMES = { NYT: "The Times Puzzles", Web: "Around the Web", Sports: "Sports" };
+const SECTION_NAMES = { House: "Our Own Puzzle", NYT: "The Times Puzzles", Web: "Around the Web", Sports: "Sports" };
 const ORD = n => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/, USER_RE = /^[A-Za-z0-9_.]{2,16}$/;
 
@@ -72,7 +72,7 @@ function render() {
           ${L ? `<div class="leader">Leader: ${esc(L.profiles?.username || "someone")} · ${esc(L.score || "")}</div>` : ""}
           <div class="go">${e ? "Play again" : "Play"} →</div></div>
           <div class="pbtns">${e ? "" : `<button class="pbtn" data-act="log" data-id="${g.id}">Log</button>`}<button class="pbtn" data-act="rank" data-id="${g.id}">Rankings</button></div></div>
-        <a class="cover" href="${g.url}" target="_blank" rel="noopener" aria-label="Play ${g.name}"></a>
+        <a class="cover" href="${g.url}"${g.house ? "" : ` target="_blank" rel="noopener"`} aria-label="Play ${g.name}"></a>
         ${e ? `<div class="stamp${fresh === g.id ? " fresh" : ""}"><b>Solved</b></div>` : ""}
       </article>`; }).join("")}</div></section>`;
   }).join("");
